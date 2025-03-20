@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Product Details</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <h1>Product Details</h1>
+    <div id="product-details">
+        <h2 th:text="${product.name}">Product Name</h2>
+        <img th:src="@{'/images/' + ${product.imageUrl}}" alt="Product Image" width="300" height="300">
+        <p th:text="${product.description}">Product Description</p>
+        <p>Price: <span th:text="${product.price}">Price</span></p>
+        <p>Quantity: <span th:text="${product.quantity}">Quantity</span></p>
+        
+        <a th:href="@{/payment/buy/{id}(id=${product.id})}">
+    <button>Buy Now</button>
+	</a>
+
+	 </div>
+        <a href="/">Back to Product List</a>
+</body>
+</html>

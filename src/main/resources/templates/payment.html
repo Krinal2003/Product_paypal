@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Payment Page</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <h1>Payment Details</h1>
+
+    <h2 th:text="${productName}">Product Name</h2>
+    <p>Price: $<span th:text="${amount}">10.00</span></p>
+
+    <!-- PayPal Payment Button -->
+    <form action="/payment/payment" method="post">
+      <input type="hidden" name="amount" th:value="${amount}" />
+      <button type="submit">Pay with PayPal</button>
+    </form>
+
+    <a href="/">Back to Home</a>
+  </body>
+</html>
