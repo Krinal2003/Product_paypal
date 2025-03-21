@@ -5,9 +5,13 @@ import com.product.entity.Product;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.autoconfigure.domain.EntityScan;
 import org.springframework.context.annotation.Bean;
+import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 
 @SpringBootApplication(scanBasePackages = "com.product")
+@EnableJpaRepositories(basePackages = "com.product.DAO")  // ✅ Scan repository package
+@EntityScan(basePackages = "com.product.entity") 
 public class ProductApplication {
 
     public static void main(String[] args) {

@@ -1,5 +1,6 @@
 package com.product.controller;
 
+import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -9,12 +10,13 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.view.RedirectView;
-
 import com.paypal.api.payments.Links;
 import com.paypal.api.payments.Payment;
 import com.paypal.api.payments.Refund;
 import com.paypal.base.rest.PayPalRESTException;
+import com.product.entity.OrderTransaction;
 import com.product.entity.Product;
+import com.product.services.OrderTransactionService;
 import com.product.services.PayPalService;
 import com.product.services.ProductServices;
 
@@ -22,6 +24,8 @@ import com.product.services.ProductServices;
 @RequestMapping("/payment")
 public class PayPalController {
 
+	 @Autowired
+	 OrderTransactionService orderTransactionService; 
     @Autowired
     ProductServices productServices;
 
@@ -85,7 +89,7 @@ public class PayPalController {
             @RequestParam("PayerID") String payerId,
             Model model) {
         try {
-            Payment payment = payPalService.excecutePayment(paymentId, payerId);
+            Payment payment = payPalService.executePayment(paymentId, payerId);
             System.out.println("Execute: "+payment.toJSON());
             if (payment.getState().equals("approved")) {
                 model.addAttribute("message", "Payment successful!");
@@ -111,11 +115,22 @@ public class PayPalController {
         return "error";
     }
     @PostMapping("/refund")
-    public String refundPayment(@RequestParam String name, Model model) {
+    public String refundPayment(Model model) {
         try {
-            Refund refund = payPalService.refundPayment(name);
+        	String transactionId = "3AXXXX6XXXXXXXX";
+            var transactionOpt = orderTransactionService.findByTransactionId(transactionId);
+            if (transactionOpt.isEmpty()) {
+                model.addAttribute("message", "Transaction not found");
+                return "refundError";
+            }
+
+            Refund refund = payPalService.refundPayment(transactionId);
+            OrderTransaction transaction = transactionOpt.get();
+            transaction.setStatus("REFUNDED");
+            orderTransactionService.saveTransaction(transaction);
+
             model.addAttribute("message", "Refund successful! Refund ID: " + refund.getId());
-            return "refundSuccess"; 
+            return "refundSuccess";
         } catch (PayPalRESTException e) {
             model.addAttribute("message", "Refund failed: " + e.getMessage());
             return "refundError";
@@ -125,5 +140,11 @@ public class PayPalController {
     public String showRefundPage() {
         return "refund"; 
     }
-
+    
+    @GetMapping("/orders")
+    public String showOrders(Model model) {
+        List<OrderTransaction> orders = orderTransactionService.getAllOrders();
+        model.addAttribute("orders", orders);
+        return "ordered";
+    }
 }
